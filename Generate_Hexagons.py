@@ -2,9 +2,12 @@
 # coding:utf-8
 # Author: D.E.Smith
 # Date:
-# Description: Generate Hexagons. 
-# Credit: graber comment from http://blogs.esri.com/esri/arcgis/2013/05/06/a-new-tool-for-creating-sampling-hexagons/
-# Notes: 
+# Description: Generate Hexagons.
+# Credit: graber  and twhiteaker's comment from http://blogs.esri.com/esri/arcgis/2013/05/06/a-new-tool-for-creating-sampling-hexagons/
+# Notes:
+# ToDo: 1) Need to convert the AOI to a geometry object and compare the hexagon. if it intersects then insert into the output data setOn intersect, insert.
+#       2) auto generate the output dataset
+#       3) selectable area units.
 # Dependencies: ArcGIS Desktop 10.1+, python 2.7
 # Archetecture: 32bit, 64bit (wuth proper installs)
 
@@ -14,7 +17,7 @@ from arcpy import env
 import datetime
 
 starttime = datetime.datetime.now()
- 
+
 env.overwriteOutput = True
 
 # Change parameters below to suit your needs
@@ -26,10 +29,12 @@ hexarea = float(hexareastr) * float(10000) #area conversion betoween ha and sq m
 triarea = hexarea / 6
 oneside = math.sqrt((triarea * 4) / math.sqrt(3))
 halfside = oneside / 2
+# Need to recondince
 _oneHi = halfside * halfside
 oneHi_ =oneside * oneside
 _oneHi_ = oneHi_ - _oneHi
 onehi = math.sqrt(_oneHi_)
+#------
 longway = oneside * 2
 shortway = onehi * 2
 
@@ -54,7 +59,7 @@ arcpy.AddMessage(oum)
 arcpy.AddMessage("Generating Hexagons…")
 
 
-# Open an InsertCursor 
+# Open an InsertCursor
 #
 cursor = arcpy.da.InsertCursor(output_tot, ("SHAPE@"))
 
@@ -72,43 +77,43 @@ for xc in range(int((x_range + longway + oneside + 0.02) / distancex)):
         centery = ystart + (yc * distancey)
         #Hex Generation
         gonarray = arcpy.Array()
-        
+
         pt1 = arcpy.Point()
         pt1.X = centerx + halfside
         pt1.Y = centery + onehi
         gonarray.add(pt1)
-        
+
         pt2 = arcpy.Point()
         pt2.X = centerx + oneside
         pt2.Y = centery
         gonarray.add(pt2)
-        
+
         pt3 = arcpy.Point()
         pt3.X = centerx + halfside
         pt3.Y = centery - onehi
         gonarray.add(pt3)
-        
+
         pt4 = arcpy.Point()
         pt4.X = centerx - halfside
         pt4.Y = centery - onehi
         gonarray.add(pt4)
-        
+
         pt5 = arcpy.Point()
         pt5.X = centerx - oneside
         pt5.Y = centery
         gonarray.add(pt5)
-        
+
         pt6 = arcpy.Point()
         pt6.X = centerx - halfside
         pt6.Y = centery + onehi
         gonarray.add(pt6)
-        
+
         pt7 = arcpy.Point()
         pt7.X = centerx + halfside
         pt7.Y = centery + onehi
         gonarray.add(pt7)
-        
-        
+
+
         op = arcpy.Polygon (gonarray)
         # check to see if the polygon intersects the extent if so insert
         #if op.touches(extentlayer) == True:
